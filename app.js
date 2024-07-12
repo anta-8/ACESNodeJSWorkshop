@@ -1,5 +1,5 @@
-
 require("dotenv").config()
+
 const express = require("express")
 const connectToDb = require("./database/databaseConnection")
 const Blog = require("./model/blogModel")
@@ -14,8 +14,7 @@ app.use(cookieParser())
 const {multer,storage} = require('./middleware/multerConfig') 
 const User = require("./model/userModel")
 const upload = multer({storage : storage})
-const jwt = require("jsonwebtoken")
-const isAuthenticated = require("./middleware/isAuthenticated")
+const Jwt=require("jsonwebtoken")
 
 connectToDb()
 
@@ -24,16 +23,16 @@ app.use(express.urlencoded({extended : true}))
 
 app.set('view engine','ejs')
 
-app.get("/", async (req,res)=>{
+app.get("/",isAuthenticated ,async (req,res)=>{
     const blogs = await Blog.find() // always returns arrray 
     res.render("./blog/home",{blogs})
 })
 
-app.get("/about",isAuthenticated, (req,res)=>{
-    const name = "Manish Basnet"
+app.get("/about",isAuthenticated,(req,res)=>{
+    const name = "anita magar"
     res.render("about.ejs",{name})
 })
-app.get("/createblog",isAuthenticated, (req,res)=>{
+app.get("/createblog",isAuthenticated,(req,res)=>{
     console.log(req.userId)
     res.render("./blog/createBlog")
 })
@@ -117,15 +116,15 @@ app.post("/login",async (req,res)=>{
     if(!isMatched){
         res.send("Invalid password")
     }else{
-        // require("dotenv").config()
-        
-        const token = jwt.sign({userId : user[0]._id},process.env.SECRET,{
-            expiresIn : '20d'
+        const token=Jwt.sign({userId: user[0]._id},process.env.SECRET, {
+expireIn:'20d'
         })
+        
+    
         res.cookie("token",token)
         res.send("logged in successfully")
     }
-  }
+}
 
 })
 
